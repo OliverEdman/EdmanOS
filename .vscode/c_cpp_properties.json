@@ -1,0 +1,21 @@
+{
+    "configurations": [
+        {
+            "name": "STM32-ARM",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/kernel",
+                "${workspaceFolder}/arch/arm/cortex-m4"
+            ],
+            "defines": [
+                "STM32F446xx",
+                "__ARM_ARCH_7M__"
+            ],
+            "compilerPath": "/usr/bin/arm-none-eabi-gcc",
+            "cStandard": "c11",
+            "cppStandard": "c++11",
+            "intelliSenseMode": "linux-gcc-arm"
+        }
+    ],
+    "version": 4
+}
