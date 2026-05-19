@@ -24,6 +24,11 @@ MEMORY
 
 SECTIONS
 {
+    /* Calculate the top of RAM dynamically where the stack begins.
+       0x20000000 (ORIGIN) + 128K (LENGTH) = 0x20020000. 
+       This symbol is exported to startup.c. */
+    _estack = ORIGIN(RAM) + LENGTH(RAM);
+
     /**
      * .isr_vector: This is the most important section.
      * It contains the Vector Table (Stack-top and Reset_Handler).
@@ -97,5 +102,3 @@ SECTIONS
         _ebss = .;          /* Mark the end of .bss in RAM */
     } > RAM
 }
-
-
