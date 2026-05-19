@@ -1,0 +1,15 @@
+# --- Kompilerade filer (Byggfiler) ---
+*.o
+*.elf
+*.bin
+*.map
+
+# --- Neovim / Vim temporära filer ---
+*.swp
+*.swo
+*~
+.netrwhist
+
+# --- Eventuella doldaOS-filer ---
+.DS_Store
+ Thumbs.db
