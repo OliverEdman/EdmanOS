@@ -10,43 +10,56 @@
 
 #include <stdint.h>
 
-// Top of Block 1 (SRAM). The stack grows downwards from here.
-// A 32-bit pointer pointing to the address where the top of the stack is.
-#define STACK_TOP (uint32_t *)0x20020000 
-
-// 'extern' means that main() exists in another file (e.g., kernel/main.c)
+/* 'extern' means these symbols are defined outside this file (in stm32f446.ld) */
 extern int main(void);
 void Reset_Handler(void);
 
-// Struct that matches exactly what the hardware expects.
+/* Import the exact memory boundary addresses from the Linker Script */
+extern uint32_t _estack;  /* Top of RAM, where the stack begins */
+extern uint32_t _sidata;  /* Start of .data initialization values in FLASH */
+extern uint32_t _sdata;   /* Start of .data section in RAM */
+extern uint32_t _edata;   /* End of .data section in RAM */
+extern uint32_t _sbss;    /* Start of .bss section in RAM */
+extern uint32_t _ebss;    /* End of .bss section in RAM */
+
+/* Struct that matches exactly what the Cortex-M4 hardware expects at boot */
 typedef struct {
-    uint32_t *initial_sp_value;   // Address for Stack Pointer (SP)
-    void (*reset_handler)(void);  // Address to the first instruction (PC)
+    uint32_t *initial_sp_value;   /* Address for Stack Pointer (SP) */
+    void (*reset_handler)(void);  /* Address to the first instruction (PC) */
 } VectorTable;
 
 /**
- * __attribute__((section(".isr_vector"))) 
- * __attribute is not part of standard C but is an addition in GCC. 
- * The compiler has a standard way to store and decide where things should be placed,
- * but here we tell the compiler: "I want to decide for myself where the vector table should be,"
- * at address 0x08000000, so that the processor finds it immediately at start.
+ * __attribute__((section(".isr_vector")))
+ * We force the compiler to place this specific structure at the very beginning 
+ * of the FLASH memory (0x08000000) so the CPU finds it immediately at power-on.
  */
 __attribute__((section(".isr_vector")))
 const VectorTable vector_table = {
-    .initial_sp_value = STACK_TOP,      // Step 1: Give the processor a workspace (Stack)
-    .reset_handler    = Reset_Handler   // Step 2: Tell it where the code starts
+    .initial_sp_value = &_estack,       /* Step 1: Give the processor its workspace (Stack) */
+    .reset_handler    = Reset_Handler   /* Step 2: Tell it where the execution starts */
 };
 
 /**
- * This is the very first function that runs in my kernel.
- * It functions as a bridge between the raw hardware and C code.
+ * This is the very first function that runs in the kernel.
+ * It functions as a bridge between the raw hardware and the C environment.
  */
 void Reset_Handler(void) {
-   
+    /* Copy initialized global variables (.data) from FLASH to RAM */
+    uint32_t *src = &_sidata;
+    uint32_t *dst = &_sdata;
+    while (dst < &_edata) {
+        *dst++ = *src++;
+    }
+
+    /* Clear uninitialized global variables (.bss) in RAM to zero */
+    dst = &_sbss;
+    while (dst < &_ebss) {
+        *dst++ = 0;
+    }
+
+    /* The C environment is now 100% ready. Jump to your main application! */
     main();
 
-    // If main against all odds should return, stay here forever.
-    while(1);
+    /* If main, should return, trap the CPU here forever */
+    while (1);
 }
-
-
