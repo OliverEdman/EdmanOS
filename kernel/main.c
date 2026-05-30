@@ -13,30 +13,25 @@ int main(void) {
     *RCC_AHB1ENR |= (1U << 0); /* Starta klockan för GPIOA */
 
     volatile uint32_t *GPIOA_MODER = (uint32_t *)0x40020000;
-    *GPIOA_MODER &= ~(3U << (5 * 2));
-    *GPIOA_MODER |=  (1U << (5 * 2)); /* PA5 till Output */
+    /* Rensa och sätt pinne 10 till General Purpose Output (01 binärt) */
+    *GPIOA_MODER &= ~(3U << (10 * 2));
+    *GPIOA_MODER |=  (1U << (10 * 2)); 
 
     volatile uint32_t *GPIOA_ODR = (uint32_t *)0x40020014;
     
-    /* --- TÄND LAMPAN --- */
-    /* Vi tänder lampan med rå hårdvaru-access.
-       Om lampan lyser till grönt nu vet vi att vi nådde hit. */
-    *GPIOA_ODR |= (1U << 5); 
+    /* --- TÄND LAMPAN (D2 / PA10) --- */
+    *GPIOA_ODR |= (1U << 10); 
 
-    /* Vänta en kort stund med lampan tänd för att vi ska hinna se den */
+    /* Vänta en kort stund med lampan tänd */
     fast_delay();
 
     /* --- STACK-TEST --- */
-    /* Om stackpekaren pekar fel, kraschar processorn precis HÄR när 
-       vi försöker spara returadressen för funktionen fast_delay().
-       Om lampan släcks, lyckades hoppet! */
     fast_delay();
-    *GPIOA_ODR &= ~(1U << 5); /* Släck lampan */
+    *GPIOA_ODR &= ~(1U << 10); /* Släck lampan */
 
     while(1) {
-        /* Om vi lyckades med stack-testet och släkte lampan,
-           blinkar vi långsamt för succé. */
-        *GPIOA_ODR ^= (1U << 5);
+        /* Blinkar långsamt för succé på D2 */
+        *GPIOA_ODR ^= (1U << 10);
         for(volatile int i = 0; i < 2000000; i++) __asm__("nop");
     }
 }
