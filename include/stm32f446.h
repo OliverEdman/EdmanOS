@@ -60,10 +60,27 @@
 #define SYSCFG_BASE           (APB2PERIPH_BASE + 0x3800UL)
 #define EXTI_BASE             (APB2PERIPH_BASE + 0x3C00UL)
 
+/* GPIO */ 
+
 /* (Pekare till structs) */
 #define GPIOA       ((GPIO_TypeDef *) GPIOA_BASE)
 #define GPIOB       ((GPIO_TypeDef *) GPIOB_BASE)
 #define GPIOC       ((GPIO_TypeDef *) GPIOC_BASE)
 #define RCC         ((RCC_TypeDef *) RCC_BASE)
 
-#endif /* STM32F446XX_H */
+
+/* struct for my GPIO registers */
+typedef struct {
+	volatile uint32_t MODER; ///< Offset 0x00
+	volatile uint32_t OTYPER; ///< Offset 0x04
+	volatile uint32_t OSPEEDR; ///< Offset 0x08
+	volatile uint32_t PUPDR; ///< Offset 0x0C
+	volatile uint32_t IDR; ///< Offset 0x10
+	volatile uint32_t ODR; ///< Offset 0x14
+	volatile uint32_t BSRR; ///< Offset 0x18
+	volatile uint32_t LCKR; ///< Offset 0x1C
+	volatile uint32_t AFR[2]; ///< Offset 0x20
+} GPIO_TypeDef;
+
+#endif /* STM32F446XX_H */ 
+
