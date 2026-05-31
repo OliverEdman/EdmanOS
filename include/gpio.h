@@ -31,10 +31,9 @@ struct gpio;
  * gpio_new() - Creates a new GPIO instance.
  * @pin: Pin number on the MCU.
  * @direction: Desired direction (see &enum gpio_direction).
- *
- * Return: A pointer to a newly allocated &struct gpio instance.
+ * @return: A pointer to a newly allocated &struct gpio instance, or NULL on failure.
  */
-struct gpio gpio_new(uint8_t pin, enum gpio_direction direction);
+struct gpio *gpio_new(uint8_t pin, enum gpio_direction direction);
 
 /**
  * gpio_delete() - Frees a GPIO instance and nullifies the pointer.
@@ -49,18 +48,19 @@ void gpio_delete(struct gpio **self);
  * @self: Pointer to the GPIO object.
  * @state: Boolean value (true for high, false for low).
  */
-void gpio_write(struct gpio *self, bool state);
+int gpio_write(struct gpio *self, bool state);
 
 /**
  * gpio_read() - Reads the state of a GPIO pin.
  * @self: Pointer to the GPIO object.
- *
- * Return: true if the pin is high, false if the pin is low.
+ * @return: true if the pin is high, false if the pin is low.
+ * Note: If self is NULL, default behavior is false.
  */
 bool gpio_read(const struct gpio *self);
 
 /**
  * gpio_toggle() - Toggles the state of a GPIO pin.
  * @self: Pointer to the GPIO object.
+ * @return: 0 on success, negative error code on failure.
  */
-void gpio_toggle(struct gpio *self);
+int gpio_toggle(struct gpio *self);
