@@ -10,20 +10,22 @@
 
 #pragma once
 
+#include "stm32f446.h"
+
 #include <stdint.h>
 #include <stdbool.h>
 
-/**
- * enum gpio_direction - Defines the direction for a GPIO pin.
- * @GPIO_DIRECTION_INPUT: Input mode without internal pull-up.
- * @GPIO_DIRECTION_INPUT_PULLUP: Input mode with internal pull-up enabled.
- * @GPIO_DIRECTION_OUTPUT: Output mode.
- */
-enum gpio_direction {
-	GPIO_DIRECTION_INPUT,
-	GPIO_DIRECTION_INPUT_PULLUP,
-	GPIO_DIRECTION_OUTPUT,
-};
+#define GPIO_MAX_INSTANCES 16U 
+
+#define GPIO_MODE_INPUT 0x0UL
+#define GPIO_MODE_OUTPUT 0x1UL
+#define GPIO_MODE_ALT 0x2UL
+#define GPIO_MODE_ANALOG 0x3UL
+
+#define GPIO_PUPD_NONE 0x0UL
+#define GPIO_PUPD_UP 0x1UL
+#define GPIO_PUPD_DOWN 0x2UL
+
 
 struct gpio;
 
@@ -33,7 +35,7 @@ struct gpio;
  * @direction: Desired direction (see &enum gpio_direction).
  * @return: A pointer to a newly allocated &struct gpio instance, or NULL on failure.
  */
-struct gpio *gpio_new(uint8_t pin, enum gpio_direction direction);
+struct gpio *gpio_new(GPIO_TypeDef *port, uint8_t pin, uint32_t mode);
 
 /**
  * gpio_delete() - Frees a GPIO instance and nullifies the pointer.
@@ -48,7 +50,7 @@ void gpio_delete(struct gpio **self);
  * @self: Pointer to the GPIO object.
  * @state: Boolean value (true for high, false for low).
  */
-int gpio_write(struct gpio *self, bool state);
+int8_t gpio_write(struct gpio *self, bool state);
 
 /**
  * gpio_read() - Reads the state of a GPIO pin.
@@ -63,4 +65,4 @@ bool gpio_read(const struct gpio *self);
  * @self: Pointer to the GPIO object.
  * @return: 0 on success, negative error code on failure.
  */
-int gpio_toggle(struct gpio *self);
+int8_t gpio_toggle(struct gpio *self);

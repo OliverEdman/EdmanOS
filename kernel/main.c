@@ -1,37 +1,33 @@
-#include <stdint.h>
+#include "gpio.h"
+#include <stddef.h>
 
-/* Diagnos-delay för att vi ska hinna se lampan innan stack-testet */
-void fast_delay(void) {
-    for(volatile int i = 0; i < 500000; i++) {
+
+void fast_delay(uint32_t count) {
+    for(volatile uint32_t i = 0; i < count; i++) {
         __asm__("nop");
     }
 }
 
 int main(void) {
-    /* --- HÅRDVARU-INIT DIREKT --- */
+    // starta klocka vväck hårdvara
     volatile uint32_t *RCC_AHB1ENR = (uint32_t *)0x40023830;
-    *RCC_AHB1ENR |= (1U << 0); /* Starta klockan för GPIOA */
+    *RCC_AHB1ENR |= (1U << 0); 
 
-    volatile uint32_t *GPIOA_MODER = (uint32_t *)0x40020000;
-    /* Rensa och sätt pinne 10 till General Purpose Output (01 binärt) */
-    *GPIOA_MODER &= ~(3U << (10 * 2));
-    *GPIOA_MODER |=  (1U << (10 * 2)); 
+    /* Skapa GPIO objekt (D2) */
+    struct gpio *led = gpio_new(GPIOA, 10U, GPIO_MODE_OUTPUT);
 
-    volatile uint32_t *GPIOA_ODR = (uint32_t *)0x40020014;
-    
-    /* --- TÄND LAMPAN (D2 / PA10) --- */
-    *GPIOA_ODR |= (1U << 10); 
-
-    /* Vänta en kort stund med lampan tänd */
-    fast_delay();
-
-    /* --- STACK-TEST --- */
-    fast_delay();
-    *GPIOA_ODR &= ~(1U << 10); /* Släck lampan */
+    if (led != NULL) {
+        gpio_write(led, true);  
+        fast_delay(500000U);
+        
+        gpio_write(led, false);
+        fast_delay(500000U);
+    }
 
     while(1) {
-        /* Blinkar långsamt för succé på D2 */
-        *GPIOA_ODR ^= (1U << 10);
-        for(volatile int i = 0; i < 2000000; i++) __asm__("nop");
+        if (led != NULL) {
+            gpio_toggle(led);
+        }
+        fast_delay(200000U);
     }
 }
