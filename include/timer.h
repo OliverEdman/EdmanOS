@@ -12,9 +12,13 @@
  */
 
 
+
 #pragma once
 
 #include <stdint.h>
+
+
+extern volatile uint32_t current_tick;
 
 /**
  * @struct timer
@@ -49,4 +53,6 @@ void timer_start(struct timer *t);
  * * @param Pointer to the timer instance to stop.
  */
 void timer_stop(struct timer *t);
+
+void timer_tick_handler(void);
 
