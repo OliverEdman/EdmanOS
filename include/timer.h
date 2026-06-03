@@ -1,58 +1,59 @@
 /**
  * @file timer.h
- * @brief A simple linked list based timer driver interface.
- * * This module provides a flexible way to manage multiple software timers.
+ * @brief an simple timer driver interface.
+ * This module provides a flexible way to manage multiple software timers.
  * Each timer is an independent object that carries its own data and callback logic.
  * @autor Oliver Edman <o.edman@icloud.com>
  * @date 2026
  * 
  * @note Licensed under MIT License (see License file in root).
  * Copyright (c) 2026 Oliver Edman
- *
  */
-
-
-
 #pragma once
 
 #include <stdint.h>
-
-
-extern volatile uint32_t current_tick;
+#include <stdbool.h>
 
 /**
  * @struct timer
  * @brief Represents a single timer instance.
  */
 struct timer {
-	uint32_t expires; /**< The tick value when this timer triggers. */
-	uint32_t period; /**< The interval in milliseconds for periodic timers. */
-	void (*callback)(struct timer *t); /**< Pointer to the callback function. */
-	int enabled; /**< Non zero if the timer is active. */
-	struct timer *next;  /**< Pointer to the next timer in the linked list. */
+    uint32_t expires;
+    uint32_t period;
+    void (*callback)(struct timer *t);
+    bool enabled;
+    struct timer *next;
 };
 
 /**
- * @brief Initializes a timer object.
- * * Sets the default values and links the callback function. 
- * The timer is set to disabled by default.
- * * @param t Pointer to the timer instance to initialize.
- * @param ms The duration in milliseconds.
- * @param cb Pointer to the callback function.
+ * @brief Initialize the timer hardware.
+ * @return 0 on success, negative error code on failure.
  */
-void timer_setup(struct timer *t, uint32_t ms, void (*cb)(struct timer *t));
+int timer_setup(void);
 
 /**
- * @brief Adds the timer to the active timer list.
- * * @param t Pointer to the timer instance to start.
+ * @brief Get the current system time in milliseconds.
+ * @return Current tick count.
  */
-void timer_start(struct timer *t);
+uint32_t timer_get_ticks(void);
 
 /**
- * @brief Removes the timer from the active timer list and disables it.
- * * @param Pointer to the timer instance to stop.
+ * @brief Add the timer to the active timer list.
+ * @param t Pointer to the timer instance.
+ * @return 0 on success, -EINVAL if pointer is NULL, -EBUSY if already running.
  */
-void timer_stop(struct timer *t);
+int timer_start(struct timer *t);
 
-void timer_tick_handler(void);
+/**
+ * @brief Remove the timer from the active timer list.
+ * @param t Pointer to the timer instance.
+ * @return 0 on success, -EINVAL if pointer is NULL or timer not found.
+ */
+int timer_stop(struct timer *t);
 
+/**
+ * @brief Handle the periodic tick interrupt.
+ * @return 0 on success.
+ */
+int timer_tick_handler(void);
