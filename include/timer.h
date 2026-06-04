@@ -1,4 +1,4 @@
-/**
+ /**
  * @file timer.h
  * @brief an simple timer driver interface.
  * This module provides a flexible way to manage multiple software timers.
@@ -14,17 +14,31 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+
 /**
  * @struct timer
- * @brief Represents a single timer instance.
+ 
+ * @brief Represents a software timer instance. 
  */
 struct timer {
-    uint32_t expires;
-    uint32_t period;
-    void (*callback)(struct timer *t);
-    bool enabled;
-    struct timer *next;
+	/** @brief Absolute tick count when this timer triggers. */
+	uint32_t expires; 
+
+	/** @brief Period in ticks. 0 means one-shot. */
+	uint32_t period;  
+
+	/** @brief Function to call when timer expires. */
+	void (*callback)(struct timer *t); 
+
+	/** @brief True if the timer is currently running. */
+	bool enabled;     
+
+	/** @brief Pointer to the next timer in the linked list. */
+	struct timer *next; 
 };
+
+#define MAX_TIMERS 10
+
 
 /**
  * @brief Initialize the timer hardware.
@@ -47,7 +61,7 @@ int timer_start(struct timer *t);
 
 /**
  * @brief Remove the timer from the active timer list.
- * @param t Pointer to the timer instance.
+ * @param Pointer to a timer struct.
  * @return 0 on success, -EINVAL if pointer is NULL or timer not found.
  */
 int timer_stop(struct timer *t);
@@ -57,3 +71,5 @@ int timer_stop(struct timer *t);
  * @return 0 on success.
  */
 int timer_tick_handler(void);
+
+struct timer* timer_allocate(void);
